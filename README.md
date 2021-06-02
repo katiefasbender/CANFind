@@ -1,5 +1,5 @@
-# CANFind_source_code
-CANFind Source Code
+# CANFind
+CANFind
 
 CANFind (a Computationally Automated NSC-tracklet Finder) (sorry) was developed to detect "tracklets" (3+ measurements of a moving object) in the NOIRLab Source Catalog.  This repository contains the source code for CANFind V1, the code used to generate figures in the paper submitted by CANFind's creators,  
 
