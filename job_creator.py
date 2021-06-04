@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # AUTHOR: Katie Fasbender
-# katiefasbender@montana.edu
+# 	  katiefasbender@montana.edu
 
 # job_creator.py is a python script that can submit "batches" of jobs to slurm (on Hyalite) at your discretion!  
 # Use if you have many jobs that you don't want to put in the slurm job queue all at once (this will overload the queue - bad!)
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 				num_pix=hdul[1].data[counter][0] #the HP_#
 				pix_marker=hdul[1].data[counter][1] #the marker (1 for CANFind, 0 for...NOT CANFind)
 				subdir=int(int(num_pix)//1000)
-				makedir("../canfind_hpix/hgroup_%d" % subdir)
+				makedir("canfind_hpix/hgroup_%d" % subdir)
 				if counter<(num_hp+1): #if we haven't exceeded the total number of HP to analyze,
 					fh.writelines("python canfind.py %d %d\n" % (num_pix,pix_marker)) #write the CANFind command to the job file 		
 		os.system("sbatch %s" %job_file) #send the job file to slurm
