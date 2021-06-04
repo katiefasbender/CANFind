@@ -15,9 +15,11 @@ $ python path/to/canfind.py <HPix #> <analysis marker>
   
 To run CANFind on Hyalite (for MSU members), you'll need...
 - a Hyalite account 
-- a list of HEALPix (NSIDE=128) which you'd like to analyze, in the form of a FITS file with 2 columns ("PIX", "MARKER").  One is provided here, "healpix_file.fits"
+- a list of HEALPix which you'd like to analyze, in the form of a FITS file (ne is provided here, "nsc_dr1_hp_canfind.fits") with 2 columns: 
+    - "PIX" (HPix number, NSIDE=128)
+    - "MARKER" (if 1: query the HPix, analyze mmts with CANFind, & save mmts and their tracklet labels; if 0: query the HPix & save the mmts not associated with SOs)
 - job_creator.py 
     - you'll have to set some variables inside this file, guidelines in the comments 
 
 the command is:
-$ python path/to/job_creator.py path/to/healpix_file.fits
+$ python path/to/job_creator.py path/to/<healpix_filename>.fits
