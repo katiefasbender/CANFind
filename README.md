@@ -1,6 +1,23 @@
 # CANFind
-CANFind
 
 CANFind (a Computationally Automated NSC-tracklet Finder) (sorry) was developed to detect "tracklets" (3+ measurements of a moving object) in the NOIRLab Source Catalog.  This repository contains the source code for CANFind V1, the code used to generate figures in the paper submitted by CANFind's creators,  
 
-CANFind was developed on the Astro Data Lab Jupyter notebook server.  It is designed to analyze HEALPix (NSIDE=128) at a time, and takes approximately 5 seconds to 5 minutes for most HEALPix of typical object density.  Analysis is performed on Montana State University's Hyalite Computing Cluster, which allows for the analysis of up to 10 HP at a time, limited by the querying capacity of the NSC measurements & objects table. The python scripts used to generate job files for Hyalite's queue, managed by slurm, are also included in this repository.  
+CANFind was developed on the Astro Data Lab Jupyter notebook server.  It is designed to analyze HEALPix (NSIDE=128) at a time, and takes approximately 5 seconds to 5 minutes for most HEALPix of typical object density.  Analysis is performed on Montana State University's Hyalite Computing Cluster, which allows for the analysis of up to 10 HP at a time, limited by the querying capacity of the NSC measurements & objects table. The python scripts used to generate job files for Hyalite's queue, managed by slurm, are also included in this repository. 
+
+
+To run CANFind, you'll need...
+- canfind.py
+- NOIRLab's datalab query client, found here: https://github.com/noaodatalab-user/datalab-client 
+
+the "CANFind command" is:
+$ python path/to/canfind.py <HPix #> <analysis marker>
+
+  
+To run CANFind on Hyalite (for MSU members), you'll need...
+- a Hyalite account 
+- a list of HEALPix (NSIDE=128) which you'd like to analyze, in the form of a FITS file with 2 columns ("PIX", "MARKER").  One is provided here, "healpix_file.fits"
+- job_creator.py 
+    - you'll have to set some variables inside this file, guidelines in the comments 
+
+the command is:
+$ python path/to/job_creator.py path/to/healpix_file.fits
