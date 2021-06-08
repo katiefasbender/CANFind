@@ -13,7 +13,7 @@
 # where <HPix number> (NSIDE=128) is a populated healpix in the NSC  
 # and   <analysis marker> = 1 to both query and run CANFind on the mmts
 #                         = 0 to only query the HPix and save the mmts not 
-#							not associated with stationary objects (SOs)
+#				associated with stationary objects (SOs)
 #
 # Both cases write a FITS file called "healpix_<HPix number>.fits" to the directory 
 # "canfind_hpix/hgroup_<HPix number/1000>".  This was designed to run on MSU's Hyalite 
