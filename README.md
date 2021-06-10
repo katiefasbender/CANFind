@@ -10,7 +10,9 @@ To run CANFind, you'll need...
 - NOIRLab's datalab query client, found here: https://github.com/noaodatalab-user/datalab-client 
 
 the "CANFind command" is:
-| $ python path/to/canfind.py <HPix #> <analysis marker> |
+<addr>
+ $ python path/to/canfind.py <HPix #> <analysis marker> 
+ <\addr>
 
   
 To run CANFind on Hyalite (for MSU members), you'll need...
