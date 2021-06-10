@@ -31,7 +31,7 @@ $ python path/to/job_creator.py path/to/<healpix_filename>.fits
   
 Tracklet Catalog Description:
   
-  Column Names | Units | dtype | Description
+  | Column Names | Units | dtype | Description |
   
                |       |       |
   
