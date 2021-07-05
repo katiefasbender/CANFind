@@ -4,7 +4,7 @@ CANFind (a Computationally Automated NSC-tracklet Finder) (sorry) was developed 
 
 CANFind was developed on the Astro Data Lab Jupyter notebook server.  It is designed to analyze HEALPix (NSIDE=128) at a time, and takes approximately 5 seconds to 5 minutes for most HEALPix of typical object density.  Analysis is performed on Montana State University's Hyalite Computing Cluster, which allows for the analysis of up to 10 HP at a time, limited by the querying capacity of the NSC measurements & objects table. The python scripts used to generate job files for Hyalite's queue, managed by slurm, are also included in this repository. 
 
-## A complete catalog of CANFind tracklets is available in FITS format; please contact katiefasbender@montana.edu for the file.
+** A complete catalog of CANFind tracklets is available in FITS format; please contact katiefasbender@montana.edu for the file.
 
 
 To run CANFind, you'll need...
