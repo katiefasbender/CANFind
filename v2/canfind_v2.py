@@ -3,7 +3,7 @@
 # AUTHOR: Katie Fasbender
 #         katiefasbender@montana.edu
 
-# canfind.py (v2) is a python script designed to query one HEALPix (NSIDE=128) 
+# canfind_v2.py  is a python script designed to query one HEALPix (NSIDE=128) 
 # from the measurements (mmts) table of the NOIRLab Source Catalog (NSC DR1) and, if 
 # desired, run CANFind (a Computationally Automated NSC tracklet Finder) on 
 # the observations.  The input command looks like this: 
@@ -13,7 +13,7 @@
 # where <HPix number> (NSIDE=128) is a populated healpix in the NSC  
 # and   <analysis marker> = 1 to both query and run CANFind on the mmts
 #                         = 0 to only query the HPix and save the mmts not 
-#							not associated with stationary objects (SOs)
+#                           not associated with stationary objects (SOs)
 #
 # Both cases write a FITS file called "healpix_<HPix number>.fits" to the directory 
 # "canfind_hpix/hgroup_<HPix number/1000>".  This was designed to run on MSU's Hyalite 
@@ -53,11 +53,11 @@ from dl import queryClient as qc
 # Functions 
 #-----------------------------------------------------------------------------
 def query_fix(query,dtypes): 
-   '''fix a query in csv format 
-   Arguments:
+    '''fix a query in csv format 
+    Arguments:
        query = the query (str)
        dtypes = data types for each column queried (array-typr)
-   '''
+    '''
     bc=[]
     bd=query.splitlines()
     for j in bd:
@@ -65,11 +65,11 @@ def query_fix(query,dtypes):
     return(Table(np.array(bc[1:]),names=np.array(bc[0]),dtype=dtypes)) #'f8' makes it a float64
 #----------------------------------------------------------------------------
 def removal(cluster,out_table):
-	'''Remove a cluster if invalid
-	Arguments:
-		cluster = the cluster you want to analyze (astropy table)
-		out_table = table with columns "measid", "cluster_label" (astropy table)
-	'''
+    '''Remove a cluster if invalid
+    Arguments:
+        cluster = the cluster you want to analyze (astropy table)
+        out_table = table with columns "measid", "cluster_label" (astropy table)
+    '''
     for kt in range(0,len(cluster)): #for each point in the cluster
         clonck=out_table['measid']==cluster['measid'][kt] #using measid, find the same point in out_table
         it=clonck.tolist().index(True) #index of bad point
@@ -78,10 +78,10 @@ def removal(cluster,out_table):
 def labeling(label,out_table,members,pos):
     '''Give mmts a track label in out_table for either track formation method 
     Arguments:
-    	label = some number for the track label 
-    	out_table = table with columns "measid", "track_h", "track_p"
-    	members = track_members function outpit
-    	pos = "p" for pred_pos, "h" for hyp_pos
+        label = some number for the track label 
+        out_table = table with columns "measid", "track_h", "track_p"
+        members = track_members function outpit
+        pos = "p" for pred_pos, "h" for hyp_pos
     '''
     for kt in range(0,len(members)): #for each point
         clonck=out_table['measid']==members[kt] #find matching point in out_table
@@ -92,11 +92,11 @@ def labeling(label,out_table,members,pos):
             out_table[it]['track_p']=label #give appropriate track label
 #----------------------------------------------------------------------------
 def time_dup_removal(cluster,out_table):
-	'''Remove duplicate 'mjd's
-	Arguments:
-		cluster = the cluster you want to analyze
-		out_table = table with columns "measid", "cluster_label", "mjd"
-	''' 
+    '''Remove duplicate 'mjd's
+    Arguments:
+        cluster = the cluster you want to analyze
+        out_table = table with columns "measid", "cluster_label", "mjd"
+    ''' 
     my_list=np.array(cluster['mjd']) #list of mjds
     dups=[k for k,v in Counter(my_list).items() if v>1] #array of duplicate mjds
     for d in dups: #for each duplicate mjd,
@@ -107,26 +107,26 @@ def time_dup_removal(cluster,out_table):
             out_table[indo]['cluster_label']=-1
 #----------------------------------------------------------------------------
 def sig_clip_t(cluster,out_table):
-	'''Sigma clip on the "mjd"s
-	Arguments:
-		cluster = the cluster you want to analyze
-		out_table = table with columns "mjd"
-	'''
-	filtered_data=sigma_clip(cluster['mjd'],sigma=2) #masked array of data
-	clip_mask=[] 
-	for i in filtered_data: #for each data point in the cluster,
-		if i is ma.masked: #if the data point is masked,
-			clip_mask.append(True) #append a "True" to clip_mask so it can be removed
-		else:
-			clip_mask.append(False)        
-	removal(cluster[clip_mask],out_table) #then remove the bad data points
+    '''Sigma clip on the "mjd"s
+    Arguments:
+        cluster = the cluster you want to analyze
+        out_table = table with columns "mjd"
+    '''
+    filtered_data=sigma_clip(cluster['mjd'],sigma=2) #masked array of data
+    clip_mask=[] 
+    for i in filtered_data: #for each data point in the cluster,
+        if i is ma.masked: #if the data point is masked,
+            clip_mask.append(True) #append a "True" to clip_mask so it can be removed
+        else:
+            clip_mask.append(False)        
+    removal(cluster[clip_mask],out_table) #then remove the bad data points
 #----------------------------------------------------------------------------
 def peacc(Cluster,spacetime):
-	'''Calculate pearson correlation coefficient of cluster 
-	Arguments:
-		spacetime = "s" if you want the PCC in RA/Dec
-				  = "t" if you want the PCC in RA/mjd 
-	'''
+    '''Calculate pearson correlation coefficient of cluster 
+    Arguments:
+        spacetime = "s" if you want the PCC in RA/Dec
+                  = "t" if you want the PCC in RA/mjd 
+    '''
     x=Cluster['ra'] #RA coord.s of cluster members (X)
     if spacetime=='s': #if spacial,
         y=Cluster['dec'] #Dec coord.s of cluster members  (Y_space)
@@ -139,8 +139,8 @@ def ranslap(cluster,out_table):
     '''RANSAC analysis to remove linearity outliers of cluster in ra-mjd space, 
     also calculates velocity of cluster (at this point, a tracklet) 
     Arguments:
-		cluster = the cluster you want to analyze
-		out_table = table with columns "ra", "dec", "mjd"
+        cluster = the cluster you want to analyze
+        out_table = table with columns "ra", "dec", "mjd"
     ''' 
     ra=np.array(cluster['ra']) #RA coord.s of cluster members 
     dec=np.array(cluster['dec']) #Dec coords of cluster members
@@ -192,65 +192,65 @@ def ranslap(cluster,out_table):
             return(clu_t,no_t,0,0,clu_s,no_s) #return "0" as velocities 
 #----------------------------------------------------------------------------
 def validate_it(X,db,out_table,labels,min_ps,min_pt):
-	'''Validate each cluster using functions "peacc" and "ranslap", removes the outliers
-	Arguments:
-		X = outliers from first dbscan
-		db = second dbscan output
-		labels = cluster labels from second dbscan output
-		min_ps = PCC lower cutoff in RA,Dec 
-		min_pt = PCC lower cutoff in RA,mjd
-	'''
-	for i in range(0,max(labels)+1): #for each cluster i, except the outliers
-		clust=out_table['cluster_label']==i #define the cluster
-		cluster=out_table[clust]
-		if len(cluster)>1:   #if there's more than 1 member in the cluster,
-			time_dup_removal(cluster,out_table) #remove duplicate mjds
-			clusta=out_table['cluster_label']==i  #re-define cluster
-			clustera=out_table[clusta]
-			sig_clip_t(clustera,out_table) #sigma clip the mjds
-			clustb=out_table['cluster_label']==i #re-define the cluster
-			clusterb=out_table[clustb]
-			rans=ranslap(clusterb,out_table) #ransac the cluster, rans[1] = time outliers, rans[5] = space outliers
+    '''Validate each cluster using functions "peacc" and "ranslap", removes the outliers
+    Arguments:
+        X = outliers from first dbscan
+        db = second dbscan output
+        labels = cluster labels from second dbscan output
+        min_ps = PCC lower cutoff in RA,Dec 
+        min_pt = PCC lower cutoff in RA,mjd
+    '''
+    for i in range(0,max(labels)+1): #for each cluster i, except the outliers
+        clust=out_table['cluster_label']==i #define the cluster
+        cluster=out_table[clust]
+        if len(cluster)>1:   #if there's more than 1 member in the cluster,
+            time_dup_removal(cluster,out_table) #remove duplicate mjds
+            clusta=out_table['cluster_label']==i  #re-define cluster
+            clustera=out_table[clusta]
+            sig_clip_t(clustera,out_table) #sigma clip the mjds
+            clustb=out_table['cluster_label']==i #re-define the cluster
+            clusterb=out_table[clustb]
+            rans=ranslap(clusterb,out_table) #ransac the cluster, rans[1] = time outliers, rans[5] = space outliers
         #Space
-			if len(rans[5])>0: #if there are spacial outliers,
-				removal(rans[5],out_table) #remove the outliers
-			clustc=out_table['cluster_label']==i #re-define the cluster
-			clusterc=out_table[clustc]
-			if len(clusterc)>2:
-				pp=peacc(clusterc,'s') #calculate PCC of cluster, spacially
-				if abs(pp)<min_ps: #if spacial PCC is too low, get rid of cluster!
-					removal(clusterc,out_table) #gets rid of cluster (gives points "outlier" label)
-				else: #if PCC is high enough,
+            if len(rans[5])>0: #if there are spacial outliers,
+                removal(rans[5],out_table) #remove the outliers
+            clustc=out_table['cluster_label']==i #re-define the cluster
+            clusterc=out_table[clustc]
+            if len(clusterc)>2:
+                pp=peacc(clusterc,'s') #calculate PCC of cluster, spacially
+                if abs(pp)<min_ps: #if spacial PCC is too low, get rid of cluster!
+                    removal(clusterc,out_table) #gets rid of cluster (gives points "outlier" label)
+                else: #if PCC is high enough,
         #Time
-					if len(rans[1])>0: #If there are outliers from the RANSAC in mjd/ra,
-						removal(rans[1],out_table)  #remove the outliers        
-					clustd=out_table['cluster_label']==i #re-define the cluster
-					clusterd=out_table[clustd]
-					if len(np.unique(clusterd['mjd']))>2: #if there are more than 2 unique mjds,
-						pt=peacc(clusterd,'t') #calculate PCC of cluster, temporally
-						if abs(pt)<min_pt: #if temporal PCC is too low, get rid of cluster!
-							removal(clusterd,out_table) #gets rid of cluster (gives points "outlier" label)
-					else: #if there are fewer than 2 unique mjds,
-						removal(clusterd,out_table) #gets rid of cluster (gives points "outlier" label)
+                    if len(rans[1])>0: #If there are outliers from the RANSAC in mjd/ra,
+                        removal(rans[1],out_table)  #remove the outliers        
+                    clustd=out_table['cluster_label']==i #re-define the cluster
+                    clusterd=out_table[clustd]
+                    if len(np.unique(clusterd['mjd']))>2: #if there are more than 2 unique mjds,
+                        pt=peacc(clusterd,'t') #calculate PCC of cluster, temporally
+                        if abs(pt)<min_pt: #if temporal PCC is too low, get rid of cluster!
+                            removal(clusterd,out_table) #gets rid of cluster (gives points "outlier" label)
+                    else: #if there are fewer than 2 unique mjds,
+                        removal(clusterd,out_table) #gets rid of cluster (gives points "outlier" label)
         #Tracklets need to have 3 or more measurements. If so, give them their appropriate velocities.
-		new=out_table['cluster_label']==i
-		new_cluster=out_table[new] #new cluster
-		if len(new_cluster)<3 or (rans[2]==0 and rans[3]==0): #if the length of the cluster is less than 3, or tracklet velocity=0, make 'em all outliers!
-			removal(new_cluster,out_table) #give cluster "outlier" label
-		else: #if the length of the cluster is greater than 3, give them the appropriate velocities 
-			v_ra=rans[2] #define tracklet velocity in RA
-			v_dec=rans[3] #define tracklet velocity in dec
-			for plu in range(0,len(out_table)): #for every measurement
-				if out_table['cluster_label'][plu]==i: #if the measurement corresponds to cluster i,
-					out_table['v_ra'][plu]=v_ra #give it the tracklet velocity in RA
-					out_table['v_dec'][plu]=v_dec #and give it the tracklet velocity in Dec 
+        new=out_table['cluster_label']==i
+        new_cluster=out_table[new] #new cluster
+        if len(new_cluster)<3 or (rans[2]==0 and rans[3]==0): #if the length of the cluster is less than 3, or tracklet velocity=0, make 'em all outliers!
+            removal(new_cluster,out_table) #give cluster "outlier" label
+        else: #if the length of the cluster is greater than 3, give them the appropriate velocities 
+            v_ra=rans[2] #define tracklet velocity in RA
+            v_dec=rans[3] #define tracklet velocity in dec
+            for plu in range(0,len(out_table)): #for every measurement
+                if out_table['cluster_label'][plu]==i: #if the measurement corresponds to cluster i,
+                    out_table['v_ra'][plu]=v_ra #give it the tracklet velocity in RA
+                    out_table['v_dec'][plu]=v_dec #and give it the tracklet velocity in Dec 
 #----------------------------------------------------------------------------
 def pred_pos(table,t=[],to=[]): 
-	'''Predict tracklet member positions using corresponding tracklet velocities
-	Arguments:
-		table = out-table
-		t = time of desired pred_pos.(see below for specifications)
-	'''
+    '''Predict tracklet member positions using corresponding tracklet velocities
+    Arguments:
+        table = out-table
+        t = time of desired pred_pos.(see below for specifications)
+    '''
     mid=[] #empty array for measurement id 
     lab=[] #empty array for cluster label
     ra_ps=[] #empty array for predicted ra
@@ -275,9 +275,9 @@ def pred_pos(table,t=[],to=[]):
 def hyp_pos(table,cluster,t=[],to=[]): 
     '''Predict hypothetical point positions using one tracklet's velocity 
     Arguments:
-    	table = out_table
-    	t = time of desired pred_pos.(see below for specifications) 
-    	cluster = cluster label (#)
+        table = out_table
+        t = time of desired pred_pos.(see below for specifications) 
+        cluster = cluster label (#)
     '''
     mid=[] #empty array for measurement id 
     lab=[] #empty array for cluster label
@@ -306,8 +306,8 @@ def hyp_pos(table,cluster,t=[],to=[]):
 def track_members(cluster,pos,out_table): 
     '''Find new track members after projecting measurement positions to common time using pred_pos or hyp_pos
     Arguments:
-    	cluster = the cluster whose velocity you used to project point positions. 
-    	pos = the hyp_pos or pred_pos you ran using cluster's velocity
+        cluster = the cluster whose velocity you used to project point positions. 
+        pos = the hyp_pos or pred_pos you ran using cluster's velocity
     '''
     cl_id=[] #empty array for measurement id
     clo=out_table['cluster_label']==cluster 
@@ -345,24 +345,26 @@ if __name__ == "__main__":
     coords=hp.pix2ang(512,nbs,lonlat=True) #get the center coordinates for the8 nside=512  neighbors
     fpix=np.unique(hp.ang2pix(256,coords[0],coords[1],lonlat=True)) #find the 4 unique corresponding nside=256 helapix 
     qc.set_timeout_request(1800)
-    dat_query=qc.query(sql="".join(["SELECT meas.mjd,meas.ra,meas.raerr,meas.dec,mead.decerr,meas.measid,meas.objectid,meas.mag_auto,meas.magerr_auto,meas.filter FROM nsc_dr1.meas as meas JOIN nsc_dr1.object as obj on objectid=obj.id WHERE obj.ring256=",str(fpix[0])," or obj.ring256=",str(fpix[1])," or obj.ring256=",str(fpix[2])," or obj.ring256=",str(fpix[3])]),fmt='csv')
+    dat_query=qc.query(sql="".join(["SELECT meas.mjd,meas.ra,meas.raerr,meas.dec,meas.decerr,meas.measid,meas.objectid,meas.mag_auto,meas.magerr_auto,meas.filter FROM nsc_dr2.meas as meas JOIN nsc_dr2.object as obj on objectid=obj.id WHERE obj.ring256=",str(fpix[0])," or obj.ring256=",str(fpix[1])," or obj.ring256=",str(fpix[2])," or obj.ring256=",str(fpix[3])]),fmt='csv')#,profile="db01")
     dat=query_fix(dat_query,dtypes=['f8','f8','f8','f8','f8','U','U','f8','f8','U'])
     X=np.column_stack((np.array(dat['ra']),np.array(dat['dec'])))  #coordinates of measurements---------------------------
 
     # if there is data in this hpix, identify & remove stationary objects
     if len(dat)>0: 
+        print("there is data, let's analyze it!")
         #-------------------
         # SO Identification
         #-------------------
         #Compute DBSCAN on all measurements ----------------------------------------------------------------------------------
         db_1 = DBSCAN(eps=0.000138889, min_samples=2).fit(X) #eps=0.000139=0.5" (same spacing used to create NSC object table), to cluster SOs
-		#Get outliers from db_1 ----------------------------------------------------------------------------------------------
+        #Get outliers from db_1 ----------------------------------------------------------------------------------------------
         outliers=db_1.labels_==-1 #define outliers from first DBSCAN labels
         X_out=np.column_stack((np.array(dat['ra'][outliers]),np.array(dat['dec'][outliers]))) #coordinates of DBSCAN outliers
         
 
         # if this healpix has adequate exposure coverage, perform CANFind analysis
         if int(mark)==1: 
+            print("good exposure, performing analysis...")
             #--------------------
             # Tracklet Formation 
             #--------------------
@@ -381,6 +383,7 @@ if __name__ == "__main__":
             
             # if there is at least one cluster detected by DBSCAN, perform tracklet validation 
             if len(lab)>1:     
+                print("there is data, analysis beginning")
                 #---------------------
                 # Tracklet Validation
                 #--------------------- 
@@ -426,3 +429,5 @@ if __name__ == "__main__":
             
             # write fits file with unconnected mmts to output directory
             tr_out.write(outdir+outfile,format="fits",overwrite=True)
+        print(outdir+outfile+" written")
+    else: print("no data! sorry girl.")
