@@ -4,11 +4,11 @@
 #         katiefasbender@montana.edu
 
 # canfind_v2.py  is a python script designed to query one HEALPix (NSIDE=128) 
-# from the measurements (mmts) table of the NOIRLab Source Catalog (NSC DR1) and, if 
+# from the measurements (mmts) table of the NOIRLab Source Catalog (NSC) and, if 
 # desired, run CANFind (a Computationally Automated NSC tracklet Finder) on 
 # the observations.  The input command looks like this: 
 # 
-# $ python canfind.py <HPix number> <analysis marker>
+# $ python /path/to/canfind_v2.py <HPix number> <analysis marker>
 #
 # where <HPix number> (NSIDE=128) is a populated healpix in the NSC  
 # and   <analysis marker> = 1 to both query and run CANFind on the mmts
@@ -16,13 +16,12 @@
 #                           not associated with stationary objects (SOs)
 #
 # Both cases write a FITS file called "healpix_<HPix number>.fits" to the directory 
-# "canfind_hpix/hgroup_<HPix number/1000>".  This was designed to run on MSU's Hyalite 
-# computing cluster, which uses slurm to maintain a job queue.  The file "job_creator.py"
+# "canfind_hpix/hgroup_<HPix number/1000>".  This was designed to run on MSU's Tempest 
+# computing cluster, which uses slurm to maintain a job queue.  The file "job_creator_v2.py"
 # can be found in the same github directory you got this file from (i hope!) and will 
 # write and run a job file that executes the above python command to a set number of 
-# HPix.  job_creator.py will also create the "hgroup_<HPix number/1000>" subdirectories
-# if they do not already exist.  Please refer to README for more information regarding
-# the necessary packages & files & whatnot.  
+# HPix.  job_creator_v2.py will also create the "hgroup_<HPix number/1000>" subdirectories
+# if they do not already exist.  
 
 #-----------------------------------------------------------------------------
 # Imports
@@ -330,7 +329,7 @@ if __name__ == "__main__":
     # prepare output directory, output filename
     pix = sys.argv[1] #healpix number
     subdir = int(int(pix)//1000) #assign subdirectory (hpix#/1000)
-    outdir="/mnt/lustrefs/scratch/katie.fasbender/canfind_hpix_dr2" 
+    outdir="/home/x25h971/canfind_dr2/hpix" 
     outfile="/hgroup_%d/healpix_%d.fits" % (int(subdir),int(pix))
 
     # identify the pix marker; 
@@ -339,14 +338,14 @@ if __name__ == "__main__":
     mark = sys.argv[2] 
     
     # query the data, format for DBSCAN
-    RA=hp.pix2ang(128,int(pix),lonlat=True)[0] #assign healpix RA
-    DEC=hp.pix2ang(128,int(pix),lonlat=True)[1] #assign healpix Dec
+    RA=hp.pix2ang(128,int(pix),lonlat=True)[0] #assign healpix RA,Dec
+    DEC=hp.pix2ang(128,int(pix),lonlat=True)[1] 
     nbs=hp.get_all_neighbours(512,RA,DEC,lonlat=True) #get the 8 nearest neighbors to the cooordinates for nside=512
-    coords=hp.pix2ang(512,nbs,lonlat=True) #get the center coordinates for the8 nside=512  neighbors
-    fpix=np.unique(hp.ang2pix(256,coords[0],coords[1],lonlat=True)) #find the 4 unique corresponding nside=256 helapix 
+    coords=hp.pix2ang(512,nbs,lonlat=True) #get the center coordinates for the 8 nside=512-neighbors
+    fpix=np.unique(hp.ang2pix(256,coords[0],coords[1],lonlat=True)) #find the 4 unique corresponding nside=256-hpix 
     qc.set_timeout_request(1800)
-    dat_query=qc.query(sql="".join(["SELECT meas.mjd,meas.ra,meas.raerr,meas.dec,meas.decerr,meas.measid,meas.objectid,meas.mag_auto,meas.magerr_auto,meas.filter FROM nsc_dr2.meas as meas JOIN nsc_dr2.object as obj on objectid=obj.id WHERE obj.ring256=",str(fpix[0])," or obj.ring256=",str(fpix[1])," or obj.ring256=",str(fpix[2])," or obj.ring256=",str(fpix[3])]),fmt='csv')#,profile="db01")
-    dat=query_fix(dat_query,dtypes=['f8','f8','f8','f8','f8','U','U','f8','f8','U'])
+    dat_query=qc.query(sql="".join(["SELECT meas.mjd,meas.ra,meas.raerr,meas.dec,meas.decerr,meas.measid,meas.objectid,meas.mag_auto,meas.magerr_auto,meas.filter,meas.exposure FROM nsc_dr2.meas as meas JOIN nsc_dr2.object as obj on objectid=obj.id WHERE obj.ring256=",str(fpix[0])," or obj.ring256=",str(fpix[1])," or obj.ring256=",str(fpix[2])," or obj.ring256=",str(fpix[3])]),fmt='csv')#,profile="db01")
+    dat=query_fix(dat_query,dtypes=['f8','f8','f8','f8','f8','U','U','f8','f8','U','U'])
     X=np.column_stack((np.array(dat['ra']),np.array(dat['dec'])))  #coordinates of measurements---------------------------
 
     # if there is data in this hpix, identify & remove stationary objects
